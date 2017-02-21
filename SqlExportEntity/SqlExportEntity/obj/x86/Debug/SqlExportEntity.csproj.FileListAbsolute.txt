@@ -1,0 +1,8 @@
+E:\Projects\SqlExportEntity\SqlExportEntity\bin\Debug\SqlExportEntity.exe
+E:\Projects\SqlExportEntity\SqlExportEntity\bin\Debug\SqlExportEntity.pdb
+E:\Projects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportModels.Login.resources
+E:\Projects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportModels.Main.resources
+E:\Projects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportEntity.Properties.Resources.resources
+E:\Projects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportEntity.csproj.GenerateResource.Cache
+E:\Projects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportEntity.exe
+E:\Projects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportEntity.pdb
