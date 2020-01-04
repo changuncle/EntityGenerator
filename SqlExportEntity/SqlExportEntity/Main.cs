@@ -26,9 +26,12 @@ namespace SqlExportModels
             Login login = new Login(this);
             login.ShowDialog();
             LoadDatabase();
-
+            ChangeUsingColor();
         }
 
+        /// <summary>
+        /// 加载账户有权访问的数据库
+        /// </summary>
         private void LoadDatabase()
         {
             try
@@ -56,13 +59,17 @@ namespace SqlExportModels
             }
         }
 
+        /// <summary>
+        /// 加载指定数据库中的表
+        /// </summary>
+        /// <param name="database"></param>
         private void LoadTables(string database)
         {
             try
             {
                 if (con.State != ConnectionState.Open)
-                { 
-                    con.Open(); 
+                {
+                    con.Open();
                 }
                 StringBuilder tablesStringBuilder = new StringBuilder().AppendFormat("use {0};select * from sysobjects where xtype='U' order by name asc", database);
                 cmd = new SqlCommand(tablesStringBuilder.ToString(), con);
@@ -82,10 +89,15 @@ namespace SqlExportModels
             }
             catch (Exception ex)
             {
-                MessageBox.Show("数据表加载错误！错误信息：" + ex.Message);
+                //MessageBox.Show("数据表加载错误！错误信息：" + ex.Message);
             }
         }
 
+        /// <summary>
+        /// 切换数据库
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void cmbDatabase_TextChanged(object sender, EventArgs e)
         {
             string current = cmbDatabase.Text;
@@ -93,137 +105,101 @@ namespace SqlExportModels
             LoadTables(current);
         }
 
-        private string ChangeWords(string content)
+        /// <summary>
+        /// 选择数据表
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void lbTables_Click(object sender, EventArgs e)
         {
-            string result = Regex.Replace(content, "nvarchar", "string");
-            result = Regex.Replace(result, "varchar", "string");
-            result = Regex.Replace(result, "nchar", "string");
-            result = Regex.Replace(result, "char", "string");
-            result = Regex.Replace(result, "tinyint", "int");
-            result = Regex.Replace(result, "smallint", "int");
-            result = Regex.Replace(result, "bigint", "int");
-            result = Regex.Replace(result, "datetime", "DateTime");
-            result = Regex.Replace(result, "text", "string");
-            return result;
+            GenerateEntity(lbTables.Text);
         }
 
-        private void ChangeColor()
+        /// <summary>
+        /// 修改命名空间
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void txtNamespace_TextChanged(object sender, EventArgs e)
         {
-            txtContent.SelectionStart = 0;
-            txtContent.SelectionLength = txtContent.Text.Length;
-            txtContent.SelectionColor = Color.Black;
-            if (listDescription.Count > 0)
-            { 
-                ChangeKeyColor(listDescription, Color.Green);  
-            }
-            ChangeKeyColor("namespace ", Color.Blue);
-            ChangeKeyColor("public ", Color.Blue);
-            ChangeKeyColor("class ", Color.Blue);
-            ChangeKeyColor("/// <summary>",Color.Gray);
-            ChangeKeyColor("/// ", Color.Gray);
-            ChangeKeyColor("/// </summary>", Color.Gray);
-            ChangeKeyColor("int ", Color.Blue);
-            ChangeKeyColor("double ", Color.Blue);
-            ChangeKeyColor("float ", Color.Blue);
-            ChangeKeyColor("char ", Color.Blue);
-            ChangeKeyColor("string ", Color.Blue);
-            ChangeKeyColor("bool ", Color.Blue);
-            ChangeKeyColor("decimal ", Color.Blue);
-            ChangeKeyColor("enum ", Color.Blue);
-            ChangeKeyColor("const ", Color.Blue);
-            ChangeKeyColor("struct ", Color.Blue);
-            ChangeKeyColor("DateTime ", Color.CadetBlue);
-            ChangeKeyColor("get",Color.Blue);
-            ChangeKeyColor("set", Color.Blue);
+            GenerateEntity(lbTables.Text);
         }
 
-        public void ChangeKeyColor(string key, Color color)
+        /// <summary>
+        /// 修改using的内容
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void txtUsing_Leave(object sender, EventArgs e)
         {
-            key = FormatKey(key);
-            Regex regex = new Regex(key);
-            MatchCollection collection = regex.Matches(txtContent.Text);
-            foreach (Match match in collection)
-            {
-                txtContent.SelectionStart = match.Index;
-                txtContent.SelectionLength = key.Length;
-                txtContent.SelectionColor = color;
-            }
+            #region 统一using文本框中内容的字体
+            string text = txtUsing.Text;
+            txtUsing.Text = "";
+            txtUsing.Text = text;
+            #endregion
+            ChangeKeyColor("using", Color.Blue, txtUsing);
         }
 
-        public void ChangeKeyColor(List<string> list, Color color)
-        {
-            foreach (string str in list)
-            {
-                ChangeKeyColor(str, color);
-            }
-        }
-
-        private string FormatKey(string key)
-        {
-            if (key.Contains(@"\"))
-            {
-                key = key.Replace(@"\", @"\\");
-            }
-            if (key.Contains("("))
-            {
-                key = key.Replace("(", "\\(");
-            }
-            if (key.Contains(")"))
-            {
-                key = key.Replace(")", "\\)");
-            }
-            return key;
-        }
-
+        /// <summary>
+        /// 生成单类文件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnGenerateFile_Click(object sender, EventArgs e)
         {
-            try 
+            try
             {
-                if (string.IsNullOrEmpty(txtContent.Text.Trim()))
-                {
-                    MessageBox.Show("生成内容不能为空！"); 
-                    return;
-                }
                 if (string.IsNullOrEmpty(lbTables.Text.Trim()))
                 {
                     MessageBox.Show("请选择要生成的表！");
                     return;
                 }
-                if(string.IsNullOrEmpty(txtGeneratePath.Text.Trim()))
-                {
-                    MessageBox.Show("生成路径不能为空！");
-                    return;
-                }
-                string path = txtGeneratePath.Text.Trim();
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-                string filePath = Path.Combine(path, lbTables.Text.Trim() + ".cs");
-                StreamWriter sWriter = new StreamWriter(filePath, false, Encoding.Default);
-                sWriter.Write(txtContent.Text);
-                sWriter.Flush();
-                sWriter.Close();
-                sWriter.Dispose();
+                GenerateOneFile(lbTables.Text);
                 MessageBox.Show("文件生成成功！");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show("文件生成失败！错误信息：" + ex.Message);
             }
         }
 
-        private void GenerateEntity()
+        /// <summary>
+        /// 生成所有类文件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnGenerateAllFile_Click(object sender, EventArgs e)
+        {
+            foreach (DataRowView item in lbTables.Items)
+            {
+                string tableName = item.Row.ItemArray[0].ToString();
+                //只生成特定前缀的表
+                if (!string.IsNullOrEmpty(txtPrefixInfo.Text.Trim()) && tableName.StartsWith(txtPrefixInfo.Text.Trim(), StringComparison.OrdinalIgnoreCase))
+                {
+                    GenerateEntity(tableName);
+                    GenerateOneFile(tableName);
+                }
+                //生成所有表
+                else if (string.IsNullOrEmpty(txtPrefixInfo.Text.Trim()))
+                {
+                    GenerateEntity(tableName);
+                    GenerateOneFile(tableName);
+                }
+            }
+            MessageBox.Show("文件生成成功！");
+        }
+
+        private void GenerateEntity(string tableName)
         {
             try
             {
                 int length = 0;
                 StringBuilder contentStringBuilder = new StringBuilder();
-                string strSql = "select syscolumns.name as ColName,systypes.name as TypeName,sys.extended_properties.value as Description,sysobjects.name as TableName from syscolumns " +
+                string strSql = "select syscolumns.name as ColName,systypes.name as TypeName,sys.extended_properties.value as Description,sysobjects.name as TableName,syscolumns.isnullable from syscolumns " +
                                 "inner join sysobjects on syscolumns.id=sysobjects.id " +
                                 "inner join systypes on syscolumns.xtype=systypes.xtype " +
                                 "left join sys.extended_properties on sys.extended_properties.major_id=syscolumns.id and sys.extended_properties.minor_id=syscolumns.colorder " +
-                                "where sysobjects.name='" + lbTables.Text + "' and systypes.name<>'sysname' " +
+                                "where sysobjects.name='" + tableName + "' and systypes.name<>'sysname' " +
                                 "order by sys.extended_properties.minor_id asc";
                 con = new SqlConnection(connString);
                 con.Open();
@@ -262,7 +238,9 @@ namespace SqlExportModels
                         }
                     }
                     contentStringBuilder.Append(new string(' ', length + 4));
-                    contentStringBuilder.AppendLine("public " + ds.Tables[0].Rows[i][1].ToString() + " " + ds.Tables[0].Rows[i][0].ToString() + " { get; set; }");
+                    string typeName = ds.Tables[0].Rows[i][1].ToString();
+                    if (ds.Tables[0].Rows[i][4].ToString() == "1") typeName += "?";
+                    contentStringBuilder.AppendLine("public " + typeName + " " + ds.Tables[0].Rows[i][0].ToString() + " { get; set; }");
                 }
                 contentStringBuilder.Append(new string(' ', length));
                 contentStringBuilder.AppendLine("}");
@@ -272,7 +250,7 @@ namespace SqlExportModels
                 }
                 string result = ChangeWords(contentStringBuilder.ToString());
                 txtContent.Text = result;
-                ChangeColor();
+                ChangeContentColor();
                 adapter.Dispose();
                 cmd.Dispose();
                 con.Close();
@@ -283,14 +261,163 @@ namespace SqlExportModels
             }
         }
 
-        private void lbTables_Click(object sender, EventArgs e)
+        private void GenerateOneFile(string tableName)
         {
-            GenerateEntity();
+            if (string.IsNullOrEmpty(txtContent.Text.Trim()))
+            {
+                MessageBox.Show("生成内容不能为空！");
+                return;
+            }
+            if (string.IsNullOrEmpty(txtGeneratePath.Text.Trim()))
+            {
+                MessageBox.Show("生成路径不能为空！");
+                txtGeneratePath.Focus();
+                return;
+            }
+            string path = txtGeneratePath.Text.Trim();
+
+            #region 按前缀生成文件时必须指定前缀分隔符
+            if (cbxUsePrefix.Checked && string.IsNullOrEmpty(txtPrefixSplit.Text.Trim()))
+            {
+                MessageBox.Show("前缀分隔符不能为空！");
+                txtPrefixSplit.Focus();
+                return;
+            }
+            #endregion
+
+            #region 按前缀生成文件时获取文件对应的存储路径
+            if (cbxUsePrefix.Checked && !string.IsNullOrEmpty(txtPrefixSplit.Text.Trim()))
+            {
+                if (tableName.Trim().Contains(txtPrefixSplit.Text.Trim()))
+                {
+                    path = Path.Combine(path, tableName.Trim().Substring(0, tableName.Trim().IndexOf(txtPrefixSplit.Text.Trim())));
+                }
+            }
+            #endregion
+
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            string filePath = Path.Combine(path, tableName.Trim() + ".cs");
+
+            #region 不覆盖现有文件且文件已存在，则直接返回
+            if (!cbxCover.Checked && File.Exists(filePath))
+            {
+                return;
+            }
+            #endregion
+
+            StreamWriter sWriter = new StreamWriter(filePath, false, Encoding.Default);
+            sWriter.Write(txtUsing.Text);
+            sWriter.Write("\r\n\r\n");
+            sWriter.Write(txtContent.Text);
+            sWriter.Flush();
+            sWriter.Close();
+            sWriter.Dispose();
         }
 
-        private void txtNamespace_TextChanged(object sender, EventArgs e)
+        private string ChangeWords(string content)
         {
-            GenerateEntity();
+            string result = Regex.Replace(content, "nvarchar\\?", "string");
+            result = Regex.Replace(result, "varchar\\?", "string");
+            result = Regex.Replace(result, "nchar\\?", "string");
+            result = Regex.Replace(result, "char\\?", "string");
+            result = Regex.Replace(content, "nvarchar", "string");
+            result = Regex.Replace(result, "varchar", "string");
+            result = Regex.Replace(result, "nchar", "string");
+            result = Regex.Replace(result, "char", "string");
+            result = Regex.Replace(result, "tinyint", "int");
+            result = Regex.Replace(result, "smallint", "int");
+            result = Regex.Replace(result, "bigint", "int");
+            result = Regex.Replace(result, "datetime", "DateTime");
+            result = Regex.Replace(result, "text", "string");
+            result = Regex.Replace(result, "string\\?", "string");
+            return result;
+        }
+
+        private void ChangeContentColor()
+        {
+            txtContent.SelectionStart = 0;
+            txtContent.SelectionLength = txtContent.Text.Length;
+            txtContent.SelectionColor = Color.Black;
+            if (listDescription.Count > 0)
+            {
+                ChangeKeyColor(listDescription, Color.Green, txtContent);
+            }
+            ChangeKeyColor("namespace ", Color.Blue, txtContent);
+            ChangeKeyColor("public ", Color.Blue, txtContent);
+            ChangeKeyColor("class ", Color.Blue, txtContent);
+            ChangeKeyColor("/// <summary>", Color.Gray, txtContent);
+            ChangeKeyColor("/// ", Color.Gray, txtContent);
+            ChangeKeyColor("/// </summary>", Color.Gray, txtContent);
+            ChangeKeyColor("int ", Color.Blue, txtContent);
+            ChangeKeyColor("int?", Color.Blue, txtContent);
+            ChangeKeyColor("double ", Color.Blue, txtContent);
+            ChangeKeyColor("double?", Color.Blue, txtContent);
+            ChangeKeyColor("float ", Color.Blue, txtContent);
+            ChangeKeyColor("float?", Color.Blue, txtContent);
+            ChangeKeyColor("char ", Color.Blue, txtContent);
+            ChangeKeyColor("string ", Color.Blue, txtContent);
+            ChangeKeyColor("bool ", Color.Blue, txtContent);
+            ChangeKeyColor("decimal ", Color.Blue, txtContent);
+            ChangeKeyColor("enum ", Color.Blue, txtContent);
+            ChangeKeyColor("const ", Color.Blue, txtContent);
+            ChangeKeyColor("struct ", Color.Blue, txtContent);
+            ChangeKeyColor("DateTime ", Color.CadetBlue, txtContent);
+            ChangeKeyColor("DateTime?", Color.CadetBlue, txtContent);
+            ChangeKeyColor("get", Color.Blue, txtContent);
+            ChangeKeyColor("set", Color.Blue, txtContent);
+        }
+
+        private void ChangeUsingColor()
+        {
+            txtUsing.SelectionStart = 0;
+            txtUsing.SelectionLength = txtContent.Text.Length;
+            txtUsing.SelectionColor = Color.Black;
+            ChangeKeyColor("using", Color.Blue, txtUsing);
+        }
+
+        public void ChangeKeyColor(string key, Color color, RichTextBox richTextBox)
+        {
+            key = FormatKey(key);
+            Regex regex = new Regex(key);
+            MatchCollection collection = regex.Matches(richTextBox.Text);
+            foreach (Match match in collection)
+            {
+                richTextBox.SelectionStart = match.Index;
+                richTextBox.SelectionLength = key.Length;
+                richTextBox.SelectionColor = color;
+            }
+        }
+
+        public void ChangeKeyColor(List<string> list, Color color, RichTextBox richTextBox)
+        {
+            foreach (string str in list)
+            {
+                ChangeKeyColor(str, color, richTextBox);
+            }
+        }
+
+        private string FormatKey(string key)
+        {
+            if (key.Contains(@"\"))
+            {
+                key = key.Replace(@"\", @"\\");
+            }
+            if (key.Contains("?"))
+            {
+                key = key.Replace(@"?", @"\?");
+            }
+            if (key.Contains("("))
+            {
+                key = key.Replace("(", "\\(");
+            }
+            if (key.Contains(")"))
+            {
+                key = key.Replace(")", "\\)");
+            }
+            return key;
         }
     }
 }

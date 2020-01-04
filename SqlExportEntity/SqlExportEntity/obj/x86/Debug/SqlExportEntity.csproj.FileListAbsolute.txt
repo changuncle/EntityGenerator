@@ -6,3 +6,13 @@ E:\Projects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportEntity.Proper
 E:\Projects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportEntity.csproj.GenerateResource.Cache
 E:\Projects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportEntity.exe
 E:\Projects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportEntity.pdb
+E:\Projects\OldProjects\SqlExportEntity\SqlExportEntity\bin\Debug\SqlExportEntity.exe
+E:\Projects\OldProjects\SqlExportEntity\SqlExportEntity\bin\Debug\SqlExportEntity.pdb
+E:\Projects\OldProjects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportEntity.csprojAssemblyReference.cache
+E:\Projects\OldProjects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportModels.Login.resources
+E:\Projects\OldProjects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportModels.Main.resources
+E:\Projects\OldProjects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportEntity.Properties.Resources.resources
+E:\Projects\OldProjects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportEntity.csproj.GenerateResource.cache
+E:\Projects\OldProjects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportEntity.csproj.CoreCompileInputs.cache
+E:\Projects\OldProjects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportEntity.exe
+E:\Projects\OldProjects\SqlExportEntity\SqlExportEntity\obj\x86\Debug\SqlExportEntity.pdb
