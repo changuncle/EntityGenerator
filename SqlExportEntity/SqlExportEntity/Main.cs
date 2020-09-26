@@ -327,6 +327,7 @@ namespace SqlExportModels
             result = Regex.Replace(result, "varchar", "string");
             result = Regex.Replace(result, "nchar", "string");
             result = Regex.Replace(result, "char", "string");
+            result = Regex.Replace(result, "uniqueidentifier", "Guid");
             result = Regex.Replace(result, "tinyint", "int");
             result = Regex.Replace(result, "smallint", "int");
             result = Regex.Replace(result, "bigint", "int");
@@ -366,6 +367,8 @@ namespace SqlExportModels
             ChangeKeyColor("struct ", Color.Blue, txtContent);
             ChangeKeyColor("DateTime ", Color.CadetBlue, txtContent);
             ChangeKeyColor("DateTime?", Color.CadetBlue, txtContent);
+            ChangeKeyColor("Guid ", Color.Green, txtContent);
+            ChangeKeyColor("Guid?", Color.Green, txtContent);
             ChangeKeyColor("get", Color.Blue, txtContent);
             ChangeKeyColor("set", Color.Blue, txtContent);
         }
