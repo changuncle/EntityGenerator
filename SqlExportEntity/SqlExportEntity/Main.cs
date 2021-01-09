@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -71,7 +71,7 @@ namespace SqlExportModels
                 {
                     con.Open();
                 }
-                StringBuilder tablesStringBuilder = new StringBuilder().AppendFormat("use {0};select * from sysobjects where xtype='U' order by name asc", database);
+                StringBuilder tablesStringBuilder = new StringBuilder().AppendFormat("use {0};select * from sysobjects where xtype='U' order by name asc", GetFormatDatabaseName(database));
                 cmd = new SqlCommand(tablesStringBuilder.ToString(), con);
                 adapter = new SqlDataAdapter(cmd);
                 ds = new DataSet();
@@ -101,7 +101,7 @@ namespace SqlExportModels
         private void cmbDatabase_TextChanged(object sender, EventArgs e)
         {
             string current = cmbDatabase.Text;
-            connString = Regex.Replace(connString, "Catalog=[0-9a-zA-Z_]+;", "Catalog=" + current + ";");
+            connString = Regex.Replace(connString, "Catalog=[0-9a-zA-Z_.]+;", "Catalog=" + current + ";");
             LoadTables(current);
         }
 
@@ -421,6 +421,12 @@ namespace SqlExportModels
                 key = key.Replace(")", "\\)");
             }
             return key;
+        }
+
+        private string GetFormatDatabaseName(string database)
+        {
+            //针对SqlServer数据库
+            return "[" + database + "]";
         }
     }
 }
